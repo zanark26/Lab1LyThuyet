@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Button,
@@ -8,15 +8,36 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
-  useWindowDimensions,
+  Dimensions,
 } from 'react-native';
 
 const App = () => {
-  const { width, height } = useWindowDimensions(); // Sử dụng useWindowDimensions để lấy kích thước màn hình
-  const isPortrait = height > width;
+  const [isPortrait, setIsPortrait] = useState(true);
 
-  const imageWidth = isPortrait ? width * 0.6 : width * 0.4; // Giảm thêm kích thước hình ảnh khi xoay ngang
-  const imageHeight = isPortrait ? imageWidth * 0.75 : imageWidth * 0.5;
+  // Hàm cập nhật hướng màn hình
+  const updateLayout = () => {
+    const { width, height } = Dimensions.get('window');
+    setIsPortrait(height > width); // Xác định hướng màn hình
+  };
+
+  useEffect(() => {
+    // Gọi updateLayout lần đầu để thiết lập trạng thái ban đầu
+    updateLayout();
+
+    // Lắng nghe sự thay đổi kích thước màn hình
+    const subscription = Dimensions.addEventListener('change', updateLayout);
+
+    // Dọn dẹp sự kiện lắng nghe khi component bị hủy
+    return () => {
+      if (subscription && typeof subscription.remove === 'function') {
+        subscription.remove();
+      }
+    };
+  }, []);
+
+  const screenWidth = Dimensions.get('window').width; // Lấy chiều rộng màn hình
+  const imageWidth = isPortrait ? screenWidth * 0.6 : screenWidth * 0.4; // Điều chỉnh kích thước hình ảnh
+  const imageHeight = isPortrait ? imageWidth * 0.75 : imageWidth * 0.5; // Điều chỉnh chiều cao hình ảnh theo hướng
 
   // Tùy chỉnh StatusBar dựa trên hướng màn hình và nền tảng
   const statusBarStyle = Platform.OS === 'ios'
@@ -47,10 +68,10 @@ const App = () => {
             { flexDirection: isPortrait ? 'column' : 'row' },
           ]}
         >
-          <View style={{ ...styles.button, width: isPortrait ? width * 0.8 : width * 0.3 }}>
+          <View style={{ ...styles.button, width: isPortrait ? screenWidth * 0.8 : screenWidth * 0.4 }}>
             <Button title="Button 1" onPress={() => {}} />
           </View>
-          <View style={{ ...styles.button, width: isPortrait ? width * 0.8 : width * 0.3 }}>
+          <View style={{ ...styles.button, width: isPortrait ? screenWidth * 0.8 : screenWidth * 0.4 }}>
             <Button title="Button 2" onPress={() => {}} />
           </View>
         </View>
@@ -59,7 +80,7 @@ const App = () => {
         <TextInput
           style={[
             styles.input,
-            { width: isPortrait ? '80%' : '60%' } // Giảm kích thước input khi ở chế độ ngang
+            { width: isPortrait ? '80%' : '60%' } // Điều chỉnh kích thước input khi ở chế độ ngang
           ]}
           placeholder="Nhập văn bản"
         />

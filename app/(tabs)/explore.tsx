@@ -12,18 +12,14 @@ import {
 } from 'react-native';
 
 const App = () => {
-  const [isPortrait, setIsPortrait] = useState(true);
-
-  // Sử dụng hook useWindowDimensions để lấy kích thước màn hình
-  const { width, height } = useWindowDimensions();
+  const { width, height } = useWindowDimensions(); // Lấy kích thước màn hình
+  const isPortrait = height > width; // Xác định hướng màn hình
 
   useEffect(() => {
-    // Cập nhật trạng thái khi kích thước màn hình thay đổi
-    setIsPortrait(height > width);
+    // Chỉ cập nhật hướng màn hình khi kích thước thay đổi
   }, [width, height]);
 
-  const screenWidth = width;
-  const imageWidth = screenWidth * 0.8;
+  const imageWidth = isPortrait ? width * 0.6 : width * 0.4; // Giảm kích thước hình ảnh khi xoay ngang
   const imageHeight = isPortrait ? imageWidth * 0.75 : imageWidth * 0.5;
 
   // Tùy chỉnh StatusBar dựa trên hướng màn hình và nền tảng
@@ -55,16 +51,22 @@ const App = () => {
             { flexDirection: isPortrait ? 'column' : 'row' },
           ]}
         >
-          <View style={{ ...styles.button, width: screenWidth / 2 }}>
+          <View style={{ ...styles.button, width: isPortrait ? width * 0.8 : width * 0.4 }}>
             <Button title="Button 1" onPress={() => {}} />
           </View>
-          <View style={{ ...styles.button, width: screenWidth / 2 }}>
+          <View style={{ ...styles.button, width: isPortrait ? width * 0.8 : width * 0.4 }}>
             <Button title="Button 2" onPress={() => {}} />
           </View>
         </View>
 
         {/* Trường nhập liệu */}
-        <TextInput style={styles.input} placeholder="Nhập văn bản" />
+        <TextInput
+          style={[
+            styles.input,
+            { width: isPortrait ? '80%' : '60%' } // Giảm kích thước input khi ở chế độ ngang
+          ]}
+          placeholder="Nhập văn bản"
+        />
       </KeyboardAvoidingView>
     </>
   );
@@ -92,7 +94,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     marginTop: 20,
-    width: '80%',
     backgroundColor: '#ffffff', // Đặt màu nền của trường nhập liệu
     color: '#000000', // Đặt màu chữ cho trường nhập liệu
   },

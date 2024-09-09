@@ -1,42 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Button,
   StyleSheet,
-  Dimensions,
   Image,
   TextInput,
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  useWindowDimensions,
 } from 'react-native';
 
-
 const App = () => {
-  const [isPortrait, setIsPortrait] = useState(true);
+  const { width, height } = useWindowDimensions(); // Sử dụng useWindowDimensions để lấy kích thước màn hình
+  const isPortrait = height > width;
 
-  const updateLayout = () => {
-    const { width, height } = Dimensions.get('window');
-    setIsPortrait(height > width);
-  };
-
-  useEffect(() => {
-    // Gọi updateLayout lần đầu để thiết lập trạng thái ban đầu
-    updateLayout();
-
-    // Thêm lắng nghe thay đổi kích thước màn hình
-    const subscription = Dimensions.addEventListener('change', updateLayout);
-
-    // Dọn dẹp sự kiện lắng nghe khi component bị hủy
-    return () => {
-      if (subscription && typeof subscription.remove === 'function') {
-        subscription.remove();
-      }
-    };
-  }, []);
-
-  const screenWidth = Dimensions.get('window').width;
-  const imageWidth = screenWidth * 0.8;
+  const imageWidth = isPortrait ? width * 0.6 : width * 0.4; // Giảm thêm kích thước hình ảnh khi xoay ngang
   const imageHeight = isPortrait ? imageWidth * 0.75 : imageWidth * 0.5;
 
   // Tùy chỉnh StatusBar dựa trên hướng màn hình và nền tảng
@@ -68,16 +47,22 @@ const App = () => {
             { flexDirection: isPortrait ? 'column' : 'row' },
           ]}
         >
-          <View style={{ ...styles.button, width: screenWidth / 2 }}>
+          <View style={{ ...styles.button, width: isPortrait ? width * 0.8 : width * 0.3 }}>
             <Button title="Button 1" onPress={() => {}} />
           </View>
-          <View style={{ ...styles.button, width: screenWidth / 2 }}>
+          <View style={{ ...styles.button, width: isPortrait ? width * 0.8 : width * 0.3 }}>
             <Button title="Button 2" onPress={() => {}} />
           </View>
         </View>
 
         {/* Trường nhập liệu */}
-        <TextInput style={styles.input} placeholder="Nhập văn bản" />
+        <TextInput
+          style={[
+            styles.input,
+            { width: isPortrait ? '80%' : '60%' } // Giảm kích thước input khi ở chế độ ngang
+          ]}
+          placeholder="Nhập văn bản"
+        />
       </KeyboardAvoidingView>
     </>
   );
@@ -105,7 +90,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     marginTop: 20,
-    width: '80%',
     backgroundColor: '#ffffff', // Đặt màu nền của trường nhập liệu
     color: '#000000', // Đặt màu chữ cho trường nhập liệu
   },
